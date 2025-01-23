@@ -3,34 +3,15 @@ import { ref, onMounted } from 'vue'
 import { hc } from 'hono/client'
 import type { TodoApiRoutes, UserApiRoutes } from '@nash1111/hono-todo-backend/dist/index'
 
-interface User {
-  id: number
-  name: string
-  email: string
-  password: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface Todo {
-  id: number
-  title: string
-  completed: boolean
-  userId: number
-}
-
 const baseURL = 'http://localhost:3333/'
 const userClient = hc<UserApiRoutes>('http://localhost:3333/')
 const todoClient = hc<TodoApiRoutes>(baseURL)
 
-const users = ref<User[]>([])
-const todos = ref<Todo[]>([])
-
 async function getUsers() {
   try {
     const res = await userClient.user.$get()
-    const data = await res.json()
-    users.value = data
+    const users = await res.json()
+    return users
   } catch (error) {
     console.error(error)
   }
@@ -61,8 +42,8 @@ async function createUser() {
 async function getTodos() {
   try {
     const res = await todoClient.todo.$get()
-    const data = await res.json()
-    todos.value = data
+    const todos = await res.json()
+    return todos
   } catch (error) {
     console.error(error)
   }
@@ -91,9 +72,11 @@ async function createTodo() {
   }
 }
 
-onMounted(() => {
-  getUsers()
-  getTodos()
+onMounted(async () => {
+  const users = await getUsers()
+  const todos = await getTodos()
+  console.log(users)
+  console.log(todos)
 })
 </script>
 
